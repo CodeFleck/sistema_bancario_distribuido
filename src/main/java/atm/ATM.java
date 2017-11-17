@@ -35,7 +35,7 @@ public class ATM {
 		 InetAddress inet2 = null;
 		 String rmi_adress;
 
-		    inet = InetAddress.getByAddress(new byte[] { (byte) 192, (byte) 168, 101, (byte) 135 });
+		    inet = InetAddress.getByAddress(new byte[] { (byte) 192, (byte) 168, 101, (byte) 137 });
 		    System.out.println("Enviando Ping Request para host: " + inet);
 		    System.out.println(inet.isReachable(5000) ? "Resposta: Host online" : "Resposta: Host offline");
 
@@ -44,24 +44,31 @@ public class ATM {
 		    System.out.println(inet2.isReachable(5000) ? "Resposta: Host online" : "Resposta: Host offline");
 		
 			try {
-				registry = LocateRegistry.getRegistry(args[0]);		
-				System.out.println("RMI Port set to " + args[0]);
+				
+				
+				rmi_adress =  "127.0.0.1";
+				
+				if (inet.isReachable(5000)) {
+					rmi_adress = "192.168.101.137";
+					registry = LocateRegistry.getRegistry(rmi_adress, 1099);		
+					bank = (OperationsInterface) registry.lookup("BankServer");
+				} else if (inet2.isReachable(5000)) {
+					rmi_adress =  "192.168.101.131";
+					registry = LocateRegistry.getRegistry(rmi_adress, 1099);		
+					bank = (OperationsInterface) registry.lookup("BankServer");
+				}else if (!inet.isReachable(5000) && !inet2.isReachable(5000)){
+					rmi_adress =  "127.0.0.1";
+					registry = LocateRegistry.getRegistry(rmi_adress, 1099);		
+					bank = (OperationsInterface) registry.lookup("BankServer");
+				}
+				
+				System.out.println("RMI Host " + rmi_adress);
+			
 
 			} catch (ArrayIndexOutOfBoundsException e) {
-				registry = LocateRegistry.getRegistry(1099);
-				System.out.println("RMI Port defaulting to " + 1099); 
+				System.out.println("Algo saiu errado..."); 
 
 			}
-
-		    
-		    if (inet.isReachable(5000)) {
-			rmi_adress = "rmi://192.168.101.135/BankServer";
-			
-			bank = (OperationsInterface) registry.lookup(rmi_adress);
-		}else {
-			rmi_adress =  "rmi://192.168.101.131/BankServer";
-			bank = (OperationsInterface) registry.lookup(rmi_adress);
-		}
 		
 		    
 		if (bank != null);
